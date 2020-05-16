@@ -7,14 +7,15 @@ class UsersRouter extends router_1.Router {
     appyRoutes(application) {
         //retorna todos os users
         application.get('/users', (req, resp, next) => {
-            users_model_1.Users.findAll().then(users => {
+            users_model_1.User.find().then(users => {
                 resp.json(users);
                 return next();
             });
         });
-        //retorna 1 user por id
+        // retorna 1 user por id
         application.get('/users/:id', (req, resp, next) => {
-            users_model_1.Users.findById(req.params.id).then(user => {
+            users_model_1.User.findById(req.params.id).then(user => {
+                console.log(user);
                 if (user) {
                     resp.json(user);
                     return next();
