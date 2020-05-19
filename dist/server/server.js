@@ -18,13 +18,14 @@ class Server {
                     name: 'api-de-restaurantes',
                     version: '1.0.0'
                 });
+                this.application.use(restify.plugins.queryParser());
+                this.application.use(restify.plugins.bodyParser());
                 for (let router of routers) {
                     router.appyRoutes(this.application);
                 }
                 this.application.listen(environment_1.environment.server.port, () => {
                     resolve(this.application);
                 });
-                this.application.use(restify.plugins.queryParser());
             }
             catch (error) {
                 reject(error);

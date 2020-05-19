@@ -24,6 +24,9 @@ export class Server{
                     version: '1.0.0'
                 })
 
+                this.application.use(restify.plugins.queryParser())
+                this.application.use(restify.plugins.bodyParser())
+
                 for (let router of routers){
                     router.appyRoutes(this.application)
                 }
@@ -32,7 +35,7 @@ export class Server{
                     resolve(this.application)
                 })
 
-                this.application.use(restify.plugins.queryParser())
+                
 
                 
                 
