@@ -5,7 +5,7 @@ import { User } from './users.model';
 
 class UsersRouter extends Router {
     appyRoutes(application: restify.Server){
-        //retorna todos os users
+        
         application.get('/users', (req, resp, next) =>{
             User.find().then(users =>{
                 resp.json(users)
@@ -13,7 +13,7 @@ class UsersRouter extends Router {
             })
 
         })
-       // retorna 1 user por id
+       
         application.get('/users/:id',(req, resp, next) =>{
             User.findById(req.params.id).then(user =>{
                 console.log(user)
@@ -55,6 +55,32 @@ class UsersRouter extends Router {
             })
 
         })
+
+        application.patch('/users/:id', (req, resp, next) =>{
+            const options = {new : true}
+            User.findByIdAndUpdate(req.params.id, req.body, options).then(user =>{
+                if(user){
+                    resp.json(user)
+                    return next()
+                }
+                resp.send(400)
+                return next()
+            }) 
+             
+        })
+
+        application.del('/users/:id', (req, resp, next) =>{
+            User.remove({_id:req.params.id}).exec().then((cmdResult: any) =>{
+                if(cmdResult.result.n){
+                    resp.send(204)
+                }else{
+                    resp.send(404)
+                }
+                return next()
+            })
+        })
+
+
     }
 }
 
