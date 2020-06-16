@@ -39,5 +39,8 @@ class Server {
     bootstrap(routers = []) {
         return this.initializeDB().then(() => this.initRoutes(routers).then(() => this));
     }
+    shutdown() {
+        return mongoose.disconnect().then(() => this.application.close());
+    }
 }
 exports.Server = Server;

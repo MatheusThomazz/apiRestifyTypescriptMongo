@@ -6,6 +6,8 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
 
     basePath: string
 
+    pageSize: number = 4
+
     constructor(protected model: mongoose.Model<D>){
         super()
         this.basePath = `/${this.model.collection.name}`
@@ -21,6 +23,27 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
         return resource
     }
 
+    envelopeAll(documents: any [], options: any = {}): any {
+        const resourse: any = {
+            _links: {
+                self: `${options.url}`
+            },
+            items: documents
+        }
+        if(options.page && options.count & options.pageSize){
+            if(options.page > 1){
+                resourse._links.previous = `${this.basePath}?_page=${options.page-1}`
+            }
+            
+            const remaining = options.count - (options.page * options.pageSize)
+            if(remaining > 0){
+                resourse._links.next = `${this.basePath}?_page=${options.page+1}`
+            }
+            
+        }
+        return resourse
+    }
+
     validateId = (req, resp, next) =>{
         if(!mongoose.Types.ObjectId.isValid(req.params.id)){
             next( new NotFoundError('Document not found'))
@@ -30,9 +53,17 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
     }
 
     findAll =  (req, resp, next) =>{
-    this.model.find()
-        .then(this.renderAll(resp, next))
-        .catch(next)
+    let page = parseInt(req.query._page || 1)
+    page = page > 0 ? page:1
+
+    const skip = (page -1) * this.pageSize
+
+    this.model.count({}).exec()
+              .then(count =>this.model.find()
+              .skip(skip)
+              .limit(this.pageSize)
+              .then(this.renderAll(resp, next, {page, count, pageSize: this.pageSize, url: req.url})))
+              .catch(next)
     }
 
     findById = (req, resp, next) =>{
